@@ -18,14 +18,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: pm2 restart api
-      - run: |
-          touch .env
-          echo "${{ secrets.MONGO_DB_URL }}" > .env
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Create .env file
+        run: |
+          echo "MONGO_DB_URL=${{ secrets.MONGO_DB_URL }}" > .env
+      
+      - name: Build application
+        run: npm run build --if-present
+      
+      - name: Restart PM2 application
+        run: pm2 restart api
